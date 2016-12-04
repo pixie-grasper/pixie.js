@@ -13,4 +13,4 @@
 - pixie-grasper
 
 ## License
-- build/, pixie/: The MIT License
+- build/, src/: The MIT License
