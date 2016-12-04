@@ -85,7 +85,7 @@ window.$ = (function() {
       basename = File.basename path, '.js'
       file.write <<-EOJ
 
-    this.#{basename} = (function() {
+    this.__proto__.#{basename} = (function() {
       EOJ
       file.write(File.open(path).read.split($/).collect{ |line|
         if line.length == 0 then ''
