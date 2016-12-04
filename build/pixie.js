@@ -310,6 +310,10 @@ window.$ = (function() {
     };
   })();
 
+  pixie.prototype = (function() {
+    return {};
+  })();
+
   pixie.extend = (function() {
     const extend = function(recurse, target, source) {
       Object.keys(source).forEach(function(key) {
@@ -350,84 +354,85 @@ window.$ = (function() {
       Object.keys(elements).forEach(function(key) {
         this_[key] = elements[key];
       });
+      pixie.extend(true, this_.__proto__, pixie.prototype);
     })(this);
     this.length = elements.length;
+  };
 
-    this.__proto__.append = (function() {
-      // /* global pixie, Pixie */
+  pixie.prototype.append = (function() {
+    // /* global pixie, Pixie */
 
-      return function(element) {
-        if (this.length != 1) {
-          pixie.error('invalid self to append.');
-        } else if (element instanceof Pixie) {
-          for (let i = 0; i < element.length; i++) {
-            this[0].appendChild(element[i]);
-          }
+    return function(element) {
+      if (this.length != 1) {
+        pixie.error('invalid self to append.');
+      } else if (element instanceof Pixie) {
+        for (let i = 0; i < element.length; i++) {
+          this[0].appendChild(element[i]);
+        }
+      }
+      return this;
+    };
+  }).call(this);
+
+  pixie.prototype.text = (function() {
+    return function(value) {
+      if (value) {
+        for (let i = 0; i < this.length; i++) {
+          this[i].innerText = value;
         }
         return this;
-      };
-    }).call(this);
+      } else {
+        return this[0].innerText;
+      }
+    };
+  }).call(this);
 
-    this.__proto__.text = (function() {
-      return function(value) {
-        if (value) {
-          for (let i = 0; i < this.length; i++) {
-            this[i].innerText = value;
-          }
-          return this;
-        } else {
-          return this[0].innerText;
-        }
-      };
-    }).call(this);
+  pixie.prototype.css = (function() {
+    // /* global pixie */
 
-    this.__proto__.css = (function() {
-      // /* global pixie */
+    const instance = this;
 
-      const instance = this;
-
-      const set_style = function(target, attr, value) {
-        if (value === '') {
-          target.style[attr] = '';
-        } else {
-          target.style[attr] = value;
+    const set_style = function(target, attr, value) {
+      if (value === '') {
+        target.style[attr] = '';
+      } else {
+        target.style[attr] = value;
+        if (target.style[attr] === '') {
+          target.style[attr] = '-webkit-' + value;
           if (target.style[attr] === '') {
-            target.style[attr] = '-webkit-' + value;
+            target.style[attr] = '-moz-' + value;
             if (target.style[attr] === '') {
-              target.style[attr] = '-moz-' + value;
+              target.style[attr] = '-o-' + value;
               if (target.style[attr] === '') {
-                target.style[attr] = '-o-' + value;
-                if (target.style[attr] === '') {
-                  target.style[attr] = '-ms-' + value;
-                }
+                target.style[attr] = '-ms-' + value;
               }
             }
           }
-          if (target.style[attr] === '') {
-            target.style['-webkit-' + attr] = value;
-            target.style['-moz-' + attr] = value;
-            target.style['-o-' + attr] = value;
-            target.style['-ms-' + attr] = value;
-          }
         }
-      };
+        if (target.style[attr] === '') {
+          target.style['-webkit-' + attr] = value;
+          target.style['-moz-' + attr] = value;
+          target.style['-o-' + attr] = value;
+          target.style['-ms-' + attr] = value;
+        }
+      }
+    };
 
-      return function(...args) {
-        if (args.length == 1) {
-          if (typeof args[0] === 'object') {
-            for (let i = 0; i < instance.length; i++) {
-              Object.keys(args[0]).forEach(function(key) {
-                set_style(instance[i], key, args[0][key]);
-              });
-            }
+    return function(...args) {
+      if (args.length == 1) {
+        if (typeof args[0] === 'object') {
+          for (let i = 0; i < instance.length; i++) {
+            Object.keys(args[0]).forEach(function(key) {
+              set_style(instance[i], key, args[0][key]);
+            });
           }
-        } else {
-          pixie.error('invalid arguments detected.');
         }
-        return this;
-      };
-    }).call(this);
-  };
+      } else {
+        pixie.error('invalid arguments detected.');
+      }
+      return this;
+    };
+  }).call(this);
 
   return pixie;
 })();

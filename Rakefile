@@ -76,8 +76,10 @@ window.$ = (function() {
       Object.keys(elements).forEach(function(key) {
         this_[key] = elements[key];
       });
+      pixie.extend(true, this_.__proto__, pixie.prototype);
     })(this);
     this.length = elements.length;
+  };
     EOJ
 
     `find ./src/methods/ -name '*.js'`.split($/).each do |path|
@@ -85,22 +87,21 @@ window.$ = (function() {
       basename = File.basename path, '.js'
       file.write <<-EOJ
 
-    this.__proto__.#{basename} = (function() {
+  pixie.prototype.#{basename} = (function() {
       EOJ
       file.write(File.open(path).read.split($/).collect{ |line|
         if line.length == 0 then ''
-        elsif line =~ /^( *)(\/\* *global .*)$/ then ' ' * 6 + $1 + '// ' + $2
-        else ' ' * 6 + line
+        elsif line =~ /^( *)(\/\* *global .*)$/ then ' ' * 4 + $1 + '// ' + $2
+        else ' ' * 4 + line
         end
       }.join($/))
       file.write <<-EOJ
 
-    }).call(this);
+  }).call(this);
       EOJ
     end
 
     file.write <<-EOJ
-  };
 
   return pixie;
 })();
