@@ -3,6 +3,13 @@
 
 task :default => :build
 
+def indent(line, depth)
+  if line.length == 0 then ''
+  elsif line =~ /^( *)(\/\* *global .*)$/ then ' ' * depth + $1 + '// ' + $2
+  else ' ' * depth + line
+  end
+end
+
 task :build do
   `mkdir -p build`
   File.open('build/pixie.js', 'w') do |file|
@@ -13,17 +20,14 @@ task :build do
 window.$ = (function() {
     EOJ
 
-    `find ./src/privates/ -name '*.js'`.split($/).each do |path|
+    `find ./src/constants/ -name '*.js'`.split($/).each do |path|
       next if File.basename(path) =~ /^\./
       basename = File.basename path, '.js'
       file.write <<-EOJ
-  let #{basename} = (function() {
+  const #{basename} = (function() {
       EOJ
       file.write(File.open(path).read.split($/).collect{ |line|
-        if line.length == 0 then ''
-        elsif line =~ /^( *)(\/\* *global .*)$/ then ' ' * 4 + $1 + '// ' + $2
-        else ' ' * 4 + line
-        end
+        indent line, 4
       }.join($/))
       file.write <<-EOJ
 
@@ -32,17 +36,14 @@ window.$ = (function() {
       EOJ
     end
 
-    `find ./src/events/ -name '*.js'`.split($/).each do |path|
+    `find ./src/privates/ -name '*.js'`.split($/).each do |path|
       next if File.basename(path) =~ /^\./
       basename = File.basename path, '.js'
       file.write <<-EOJ
-  window.on#{basename} = (function() {
+  let #{basename} = (function() {
       EOJ
       file.write(File.open(path).read.split($/).collect{ |line|
-        if line.length == 0 then ''
-        elsif line =~ /^( *)(\/\* *global .*)$/ then ' ' * 4 + $1 + '// ' + $2
-        else ' ' * 4 + line
-        end
+        indent line, 4
       }.join($/))
       file.write <<-EOJ
 
@@ -58,10 +59,7 @@ window.$ = (function() {
   pixie.#{basename} = (function() {
       EOJ
       file.write(File.open(path).read.split($/).collect{ |line|
-        if line.length == 0 then ''
-        elsif line =~ /^( *)(\/\* *global .*)$/ then ' ' * 4 + $1 + '// ' + $2
-        else ' ' * 4 + line
-        end
+        indent line, 4
       }.join($/))
       file.write <<-EOJ
 
@@ -71,38 +69,27 @@ window.$ = (function() {
     end
 
     file.write <<-EOJ
-  const Pixie = function(elements) {
-    (function(this_) {
-      Object.keys(elements).forEach(function(key) {
-        this_[key] = elements[key];
-      });
-      pixie.extend(true, this_.__proto__, pixie.prototype);
-    })(this);
-    this.length = elements.length;
-  };
+  pixie.prototype = {};
+
     EOJ
 
     `find ./src/methods/ -name '*.js'`.split($/).each do |path|
       next if File.basename(path) =~ /^\./
       basename = File.basename path, '.js'
       file.write <<-EOJ
-
   pixie.prototype.#{basename} = (function() {
       EOJ
       file.write(File.open(path).read.split($/).collect{ |line|
-        if line.length == 0 then ''
-        elsif line =~ /^( *)(\/\* *global .*)$/ then ' ' * 4 + $1 + '// ' + $2
-        else ' ' * 4 + line
-        end
+        indent line, 4
       }.join($/))
       file.write <<-EOJ
 
-  }).call(this);
+  })();
+
       EOJ
     end
 
     file.write <<-EOJ
-
   return pixie;
 })();
       EOJ
