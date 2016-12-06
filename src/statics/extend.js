@@ -1,7 +1,7 @@
 const extend = function(recurse, target, source) {
   Object.keys(source).forEach(function(key) {
     if (recurse && typeof source[key] === 'object') {
-      target[key] = extend(true, target[key], source[key]);
+      target[key] = extend(true, target[key] || {}, source[key]);
     } else {
       target[key] = source[key];
     }

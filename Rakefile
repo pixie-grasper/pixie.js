@@ -90,6 +90,8 @@ window.$ = (function() {
     end
 
     file.write <<-EOJ
+  pixie(__initialize__);
+
   return pixie;
 })();
       EOJ
