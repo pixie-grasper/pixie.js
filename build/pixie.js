@@ -311,6 +311,14 @@ window.$ = (function() {
             return this.pixie.attributes.y;
           }
         },
+        color: function(color) {
+          if (color) {
+            this.pixie.attributes.color = color;
+            return this;
+          } else {
+            return this.pixie.attributes.color;
+          }
+        },
       });
     };
   })();
